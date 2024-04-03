@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -25,7 +25,7 @@ func NewCCNUService() CCNUService {
 }
 
 func (c *ccnuService) Login(ctx context.Context, studentId string, password string) (bool, error) {
-	params, err := MakeAccountPreflightRequest()
+	params, err := c.makeAccountPreflightRequest()
 	if err != nil {
 		return false, err
 	}
@@ -57,7 +57,7 @@ func (c *ccnuService) client() *http.Client {
 	}
 }
 
-type AccountReqeustParams struct {
+type accountRequestParams struct {
 	lt         string
 	execution  string
 	_eventId   string
@@ -65,15 +65,13 @@ type AccountReqeustParams struct {
 	JSESSIONID string
 }
 
-func MakeAccountPreflightRequest() (*AccountReqeustParams, error) {
+func (c *ccnuService) makeAccountPreflightRequest() (*accountRequestParams, error) {
 	var JSESSIONID string
 	var lt string
 	var execution string
 	var _eventId string
 
-	params := &AccountReqeustParams{}
-
-	client := http.Client{}
+	params := &accountRequestParams{}
 
 	// 初始化 http request
 	request, err := http.NewRequest("GET", "https://account.ccnu.edu.cn/cas/login", nil)
@@ -82,13 +80,13 @@ func MakeAccountPreflightRequest() (*AccountReqeustParams, error) {
 	}
 
 	// 发起请求
-	resp, err := client.Do(request)
+	resp, err := c.client().Do(request)
 	if err != nil {
 		return params, err
 	}
 
 	// 读取 Body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
 	if err != nil {
