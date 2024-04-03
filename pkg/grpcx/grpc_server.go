@@ -63,12 +63,10 @@ func (s *GRPCServer) register(ctx context.Context, port string) error {
 		return err
 	}
 	go func() {
-		// 可以预期，当我们的 cancel 被调用的时候，就会退出这个循环
 		for chResp := range ch {
 			s.L.Debug("续约：", logger.String("resp", chResp.String()))
 		}
 	}()
-	// metadata 我们这里没啥要提供的
 	return em.AddEndpoint(ctx, s.etcdKey,
 		endpoints.Endpoint{Addr: addr}, clientv3.WithLease(leaseResp.ID))
 }
