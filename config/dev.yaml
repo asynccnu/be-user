@@ -14,4 +14,3 @@ grpc:
     weight: 100
     addr: ":8091"
     etcdTTL: 60
-

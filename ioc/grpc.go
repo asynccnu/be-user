@@ -13,8 +13,8 @@ import (
 
 func InitGRPCxKratosServer(userServer *grpc.UserServiceServer, ecli *clientv3.Client, l logger.Logger) grpcx.Server {
 	type Config struct {
-		Name    string `json:"name"`
-		Weight  int    `json:"weight"`
+		Name    string `yaml:"name"`
+		Weight  int    `yaml:"weight"`
 		Addr    string `yaml:"addr"`
 		EtcdTTL int64  `yaml:"etcdTTL"`
 	}

@@ -48,5 +48,6 @@ func (s *userService) LoginByCCNU(ctx context.Context, studentId string, passwor
 	if err != nil && err != repository.ErrDuplicateUser {
 		return domain.User{}, err
 	}
+	// 如果后续分库分表，这里必须从主库查询
 	return s.repo.FindByStudentId(ctx, studentId)
 }
