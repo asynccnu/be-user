@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"github.com/anaskhan96/soup"
+	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -23,44 +25,28 @@ func NewCCNUService() CCNUService {
 }
 
 func (c *ccnuService) Login(ctx context.Context, studentId string, password string) (bool, error) {
-	js, st := c.preload()
-	url := fmt.Sprintf("https://account.ccnu.edu.cn/cas/login;jsessionid=%v?service=http%3A%2F%2Fone.ccnu.edu.cn%2Fcas%2Flogin_portal", js)
-	text := fmt.Sprintf("username=%s&password=%s&lt=%s&execution=e1s1&_eventId=submit&submit=%E7%99%BB%E5%BD%95", studentId, password, st)
-	body := strings.NewReader(text)
-	req, _ := http.NewRequest("POST", url, body)
-	req.Header.Set("Cookie", "JSESSIONID="+js)
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
-	req.Header.Set("Cache-Control", "max-age=0")
-	req.Header.Set("Connection", "keep-alive")
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Origin", "https://account.ccnu.edu.cn")
-	req.Header.Set("Referer", "https://account.ccnu.edu.cn/cas/login?service=http%3A%2F%2Fone.ccnu.edu.cn%2Fcas%2Flogin_portal")
-	req.Header.Set("Sec-Fetch-Dest", "document")
-	req.Header.Set("Sec-Fetch-Mode", "navigate")
-	req.Header.Set("Sec-Fetch-Site", "same-origin")
-	req.Header.Set("Sec-Fetch-User", "?1")
-	req.Header.Set("Upgrade-Insecure-Requests", "1")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0")
-	req.Header.Set("sec-ch-ua", `"Not_A Brand";v="8", "Chromium";v="120", "Microsoft Edge";v="120"`)
-	req.Header.Set("sec-ch-ua-mobile", "?0")
-	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
-	resp, err := c.client().Do(req)
+	params, err := MakeAccountPreflightRequest()
 	if err != nil {
 		return false, err
 	}
-	return resp.Header.Get("Pragma") == "", nil
-}
 
-// preload 返回值为 js 和 st
-func (c *ccnuService) preload() (string, string) {
-	htmlBody, _ := soup.Get("https://account.ccnu.edu.cn/cas/login?service=http%3A%2F%2Fone.ccnu.edu.cn%2Fcas%2Flogin_portal")
-	doc := soup.HTMLParse(htmlBody)
-	links1 := doc.Find("body", "id", "cas").FindAll("script")
-	js := links1[2].Attrs()["src"][26:]
-	links2 := doc.Find("div", "class", "logo").FindAll("input")
-	st := links2[2].Attrs()["value"]
-	return js, st
+	v := url.Values{}
+	v.Set("username", studentId)
+	v.Set("password", password)
+	v.Set("lt", params.lt)
+	v.Set("execution", params.execution)
+	v.Set("_eventId", params._eventId)
+	v.Set("submit", params.submit)
+
+	request, err := http.NewRequest("POST", "https://account.ccnu.edu.cn/cas/login;jsessionid="+params.JSESSIONID, strings.NewReader(v.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	request.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36")
+
+	resp, err := c.client().Do(request)
+	if err != nil {
+		return false, err
+	}
+	return len(resp.Header.Get("Set-Cookie")) != 0, nil
 }
 
 func (c *ccnuService) client() *http.Client {
@@ -69,4 +55,87 @@ func (c *ccnuService) client() *http.Client {
 		Timeout: c.timeout,
 		Jar:     j,
 	}
+}
+
+type AccountReqeustParams struct {
+	lt         string
+	execution  string
+	_eventId   string
+	submit     string
+	JSESSIONID string
+}
+
+func MakeAccountPreflightRequest() (*AccountReqeustParams, error) {
+	var JSESSIONID string
+	var lt string
+	var execution string
+	var _eventId string
+
+	params := &AccountReqeustParams{}
+
+	client := http.Client{}
+
+	// 初始化 http request
+	request, err := http.NewRequest("GET", "https://account.ccnu.edu.cn/cas/login", nil)
+	if err != nil {
+		return params, err
+	}
+
+	// 发起请求
+	resp, err := client.Do(request)
+	if err != nil {
+		return params, err
+	}
+
+	// 读取 Body
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	if err != nil {
+		return params, err
+	}
+
+	// 获取 Cookie 中的 JSESSIONID
+	for _, cookie := range resp.Cookies() {
+		if cookie.Name == "JSESSIONID" {
+			JSESSIONID = cookie.Value
+		}
+	}
+
+	if JSESSIONID == "" {
+		return params, errors.New("Can not get JSESSIONID")
+	}
+
+	// 正则匹配 HTML 返回的表单字段
+	ltReg := regexp.MustCompile("name=\"lt\".+value=\"(.+)\"")
+	executionReg := regexp.MustCompile("name=\"execution\".+value=\"(.+)\"")
+	_eventIdReg := regexp.MustCompile("name=\"_eventId\".+value=\"(.+)\"")
+
+	bodyStr := string(body)
+
+	ltArr := ltReg.FindStringSubmatch(bodyStr)
+	if len(ltArr) != 2 {
+		return params, errors.New("Can not get form paramater: lt")
+	}
+	lt = ltArr[1]
+
+	execArr := executionReg.FindStringSubmatch(bodyStr)
+	if len(execArr) != 2 {
+		return params, errors.New("Can not get form paramater: execution")
+	}
+	execution = execArr[1]
+
+	_eventIdArr := _eventIdReg.FindStringSubmatch(bodyStr)
+	if len(_eventIdArr) != 2 {
+		return params, errors.New("Can not get form paramater: _eventId")
+	}
+	_eventId = _eventIdArr[1]
+
+	params.lt = lt
+	params.execution = execution
+	params._eventId = _eventId
+	params.submit = "LOGIN"
+	params.JSESSIONID = JSESSIONID
+
+	return params, nil
 }
