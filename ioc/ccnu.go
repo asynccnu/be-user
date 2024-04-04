@@ -2,7 +2,7 @@ package ioc
 
 import (
 	"context"
-	ccnuv1 "github.com/MuxiKeStack/be-api/gen/proto/ccnu"
+	ccnuv1 "github.com/MuxiKeStack/be-api/gen/proto/ccnu/v1"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/spf13/viper"

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	ccnuv1 "github.com/MuxiKeStack/be-api/gen/proto/ccnu"
+	ccnuv1 "github.com/MuxiKeStack/be-api/gen/proto/ccnu/v1"
 	"github.com/MuxiKeStack/be-user/domain"
 	"github.com/MuxiKeStack/be-user/repository"
 )
