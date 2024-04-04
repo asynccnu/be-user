@@ -16,14 +16,22 @@ var (
 type UserDAO interface {
 	FindByStudentId(ctx context.Context, sid string) (User, error)
 	Insert(ctx context.Context, u User) error
+	UpdateSensitiveInfoById(ctx context.Context, user User) error
 }
 
 type GORMUserDAO struct {
 	db *gorm.DB
 }
 
-func NewGORMUserDAO(db *gorm.DB) UserDAO {
-	return &GORMUserDAO{db: db}
+func (dao *GORMUserDAO) UpdateSensitiveInfoById(ctx context.Context, user User) error {
+	now := time.Now().UnixMilli()
+	return dao.db.WithContext(ctx).
+		Where("id = ?", user.Id).
+		Updates(map[string]any{
+			"avatar":   user.Avatar,
+			"nickname": user.Nickname,
+			"utime":    now,
+		}).Error
 }
 
 func (dao *GORMUserDAO) FindByStudentId(ctx context.Context, sid string) (User, error) {
@@ -45,6 +53,10 @@ func (dao *GORMUserDAO) Insert(ctx context.Context, u User) error {
 		}
 	}
 	return err
+}
+
+func NewGORMUserDAO(db *gorm.DB) UserDAO {
+	return &GORMUserDAO{db: db}
 }
 
 type User struct {

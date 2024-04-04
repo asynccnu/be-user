@@ -34,8 +34,12 @@ func (s *UserServiceServer) LoginByCCNU(ctx context.Context, request *userv1.Log
 }
 
 func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request *userv1.UpdateNonSensitiveInfoRequest) (*userv1.UpdateNonSensitiveInfoResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	err := s.svc.UpdateNonSensitiveInfo(ctx, domain.User{
+		Id:       request.Uid,
+		Avatar:   request.Avatar,
+		Nickname: request.Nickname,
+	})
+	return &userv1.UpdateNonSensitiveInfoResponse{}, err
 }
 
 func (s *UserServiceServer) Profile(ctx context.Context, request *userv1.ProfileRequest) (*userv1.ProfileResponse, error) {

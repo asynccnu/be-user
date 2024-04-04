@@ -13,6 +13,7 @@ var (
 
 type UserService interface {
 	LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error)
+	UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
 }
 
 type userService struct {
@@ -20,8 +21,8 @@ type userService struct {
 	ccnu CCNUService
 }
 
-func NewUserService(repo repository.UserRepository, ccnu CCNUService) UserService {
-	return &userService{repo: repo, ccnu: ccnu}
+func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error {
+	return s.repo.UpdateSensitiveInfo(ctx, user)
 }
 
 func (s *userService) LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error) {
@@ -50,4 +51,8 @@ func (s *userService) LoginByCCNU(ctx context.Context, studentId string, passwor
 	}
 	// 如果后续分库分表，这里必须从主库查询
 	return s.repo.FindByStudentId(ctx, studentId)
+}
+
+func NewUserService(repo repository.UserRepository, ccnu CCNUService) UserService {
+	return &userService{repo: repo, ccnu: ccnu}
 }
