@@ -27,6 +27,10 @@ type CachedUserRepository struct {
 	l     logger.Logger
 }
 
+func NewCachedUserRepository(dao dao.UserDAO, cache cache.UserCache, l logger.Logger) UserRepository {
+	return &CachedUserRepository{dao: dao, cache: cache, l: l}
+}
+
 func (repo *CachedUserRepository) FindById(ctx context.Context, uid int64) (domain.User, error) {
 	res, err := repo.cache.Get(ctx, uid)
 	if err == nil {
@@ -84,11 +88,5 @@ func (repo *CachedUserRepository) toEntity(u domain.User) dao.User {
 		Sid:      u.StudentId,
 		Nickname: u.Nickname,
 		Avatar:   u.Avatar,
-	}
-}
-
-func NewUserRepository(dao dao.UserDAO) UserRepository {
-	return &CachedUserRepository{
-		dao: dao,
 	}
 }

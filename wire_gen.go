@@ -11,6 +11,7 @@ import (
 	"github.com/MuxiKeStack/be-user/ioc"
 	"github.com/MuxiKeStack/be-user/pkg/grpcx"
 	"github.com/MuxiKeStack/be-user/repository"
+	"github.com/MuxiKeStack/be-user/repository/cache"
 	"github.com/MuxiKeStack/be-user/repository/dao"
 	"github.com/MuxiKeStack/be-user/service"
 )
@@ -21,7 +22,9 @@ func InitGRPCServer() grpcx.Server {
 	logger := ioc.InitLogger()
 	db := ioc.InitDB(logger)
 	userDAO := dao.NewGORMUserDAO(db)
-	userRepository := repository.NewUserRepository(userDAO)
+	cmdable := ioc.InitRedis()
+	userCache := cache.NewRedisUserCache(cmdable)
+	userRepository := repository.NewCachedUserRepository(userDAO, userCache, logger)
 	ccnuService := service.NewCCNUService()
 	userService := service.NewUserService(userRepository, ccnuService)
 	userServiceServer := grpc.NewUserServiceServer(userService)
