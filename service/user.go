@@ -14,11 +14,16 @@ var (
 type UserService interface {
 	LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error)
 	UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
+	FindById(ctx context.Context, uid int64) (domain.User, error)
 }
 
 type userService struct {
 	repo repository.UserRepository
 	ccnu CCNUService
+}
+
+func (s *userService) FindById(ctx context.Context, uid int64) (domain.User, error) {
+	return s.repo.FindById(ctx, uid)
 }
 
 func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error {

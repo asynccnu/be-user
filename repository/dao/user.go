@@ -17,10 +17,17 @@ type UserDAO interface {
 	FindByStudentId(ctx context.Context, sid string) (User, error)
 	Insert(ctx context.Context, u User) error
 	UpdateSensitiveInfoById(ctx context.Context, user User) error
+	FindById(ctx context.Context, uid int64) (User, error)
 }
 
 type GORMUserDAO struct {
 	db *gorm.DB
+}
+
+func (dao *GORMUserDAO) FindById(ctx context.Context, uid int64) (User, error) {
+	var u User
+	err := dao.db.WithContext(ctx).Where("id = ?", uid).First(&u).Error
+	return u, err
 }
 
 func (dao *GORMUserDAO) UpdateSensitiveInfoById(ctx context.Context, user User) error {

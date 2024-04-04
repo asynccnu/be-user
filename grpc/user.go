@@ -22,7 +22,7 @@ func (s *UserServiceServer) Register(server grpc.ServiceRegistrar) {
 }
 
 func (s *UserServiceServer) LoginByCCNU(ctx context.Context, request *userv1.LoginByCCNURequest) (*userv1.LoginByCCNUResponse, error) {
-	u, err := s.svc.LoginByCCNU(ctx, request.StudentId, request.Password)
+	u, err := s.svc.LoginByCCNU(ctx, request.GetStudentId(), request.GetPassword())
 	switch err {
 	case nil:
 		return &userv1.LoginByCCNUResponse{User: convertToV(u)}, nil
@@ -35,16 +35,21 @@ func (s *UserServiceServer) LoginByCCNU(ctx context.Context, request *userv1.Log
 
 func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request *userv1.UpdateNonSensitiveInfoRequest) (*userv1.UpdateNonSensitiveInfoResponse, error) {
 	err := s.svc.UpdateNonSensitiveInfo(ctx, domain.User{
-		Id:       request.Uid,
-		Avatar:   request.Avatar,
-		Nickname: request.Nickname,
+		Id:       request.GetUid(),
+		Avatar:   request.GetAvatar(),
+		Nickname: request.GetNickname(),
 	})
 	return &userv1.UpdateNonSensitiveInfoResponse{}, err
 }
 
 func (s *UserServiceServer) Profile(ctx context.Context, request *userv1.ProfileRequest) (*userv1.ProfileResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	u, err := s.svc.FindById(ctx, request.GetUid())
+	if err != nil {
+		return &userv1.ProfileResponse{}, err
+	}
+	return &userv1.ProfileResponse{
+		User: convertToV(u),
+	}, nil
 }
 
 func convertToV(user domain.User) *userv1.User {

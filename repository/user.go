@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/MuxiKeStack/be-user/domain"
+	"github.com/MuxiKeStack/be-user/pkg/logger"
 	"github.com/MuxiKeStack/be-user/repository/cache"
 	"github.com/MuxiKeStack/be-user/repository/dao"
 	"time"
@@ -14,6 +15,7 @@ var (
 )
 
 type UserRepository interface {
+	FindById(ctx context.Context, uid int64) (domain.User, error)
 	FindByStudentId(ctx context.Context, studentId string) (domain.User, error)
 	Create(ctx context.Context, u domain.User) error
 	UpdateSensitiveInfo(ctx context.Context, user domain.User) error
@@ -22,16 +24,35 @@ type UserRepository interface {
 type CachedUserRepository struct {
 	dao   dao.UserDAO
 	cache cache.UserCache
+	l     logger.Logger
+}
+
+func (repo *CachedUserRepository) FindById(ctx context.Context, uid int64) (domain.User, error) {
+	res, err := repo.cache.Get(ctx, uid)
+	if err == nil {
+		return res, nil
+	}
+	if err != cache.ErrKeyNotExists {
+		// redis崩溃或者网络错误，用户量不大，MySQL撑得住，所以不降级处理
+		repo.l.Error("访问Redis失败，查询用户缓存", logger.Error(err), logger.Int64("uid", uid))
+	}
+	u, err := repo.dao.FindById(ctx, uid)
+	if err != nil {
+		return domain.User{}, err
+	}
+	res = repo.toDomain(u)
+	// 异步回写
+	go func() {
+		er := repo.cache.Set(ctx, res)
+		if er != nil {
+			repo.l.Error("回写用户缓存失败", logger.Error(err), logger.Int64("uid", uid))
+		}
+	}()
+	return res, nil
 }
 
 func (repo *CachedUserRepository) UpdateSensitiveInfo(ctx context.Context, user domain.User) error {
-	err := repo.dao.UpdateSensitiveInfoById(ctx, repo.toEntity(user))
-	if err != nil {
-		return err
-	}
-	return nil
-	// TODO 认为用户短期可能重新查看修改的内容，进行预缓存
-	//repo.cache.Set(ctx)
+	return repo.dao.UpdateSensitiveInfoById(ctx, repo.toEntity(user))
 }
 
 func (repo *CachedUserRepository) FindByStudentId(ctx context.Context, studentId string) (domain.User, error) {
