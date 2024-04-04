@@ -47,6 +47,8 @@ func (repo *CachedUserRepository) FindById(ctx context.Context, uid int64) (doma
 	res = repo.toDomain(u)
 	// 异步回写
 	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+		defer cancel()
 		er := repo.cache.Set(ctx, res)
 		if er != nil {
 			repo.l.Error("回写用户缓存失败", logger.Error(err), logger.Int64("uid", uid))
@@ -82,6 +84,7 @@ func (repo *CachedUserRepository) toDomain(u dao.User) domain.User {
 		Ctime:     time.UnixMilli(u.Ctime),
 	}
 }
+
 func (repo *CachedUserRepository) toEntity(u domain.User) dao.User {
 	return dao.User{
 		Id:       u.Id,
