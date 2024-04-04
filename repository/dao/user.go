@@ -33,6 +33,7 @@ func (dao *GORMUserDAO) FindById(ctx context.Context, uid int64) (User, error) {
 func (dao *GORMUserDAO) UpdateSensitiveInfoById(ctx context.Context, user User) error {
 	now := time.Now().UnixMilli()
 	return dao.db.WithContext(ctx).
+		Model(&User{}).
 		Where("id = ?", user.Id).
 		Updates(map[string]any{
 			"avatar":   user.Avatar,
