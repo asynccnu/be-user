@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	ccnuv1 "github.com/MuxiKeStack/be-api/gen/proto/ccnu"
 	"github.com/MuxiKeStack/be-user/domain"
 	"github.com/MuxiKeStack/be-user/repository"
 )
@@ -19,7 +20,7 @@ type UserService interface {
 
 type userService struct {
 	repo repository.UserRepository
-	ccnu CCNUService
+	ccnu ccnuv1.CCNUServiceClient
 }
 
 func (s *userService) FindById(ctx context.Context, uid int64) (domain.User, error) {
@@ -32,11 +33,14 @@ func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.Us
 
 func (s *userService) LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error) {
 	// 模拟登录
-	ok, err := s.ccnu.Login(ctx, studentId, password)
+	res, err := s.ccnu.Login(ctx, &ccnuv1.LoginRequest{
+		StudentId: studentId,
+		Password:  password,
+	})
 	if err != nil {
 		return domain.User{}, err
 	}
-	if !ok {
+	if !res.Success {
 		return domain.User{}, ErrInvalidStudentIdOrPassword
 	}
 
@@ -58,6 +62,6 @@ func (s *userService) LoginByCCNU(ctx context.Context, studentId string, passwor
 	return s.repo.FindByStudentId(ctx, studentId)
 }
 
-func NewUserService(repo repository.UserRepository, ccnu CCNUService) UserService {
+func NewUserService(repo repository.UserRepository, ccnu ccnuv1.CCNUServiceClient) UserService {
 	return &userService{repo: repo, ccnu: ccnu}
 }
