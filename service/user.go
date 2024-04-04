@@ -32,7 +32,8 @@ func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.Us
 }
 
 func (s *userService) LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error) {
-	// 模拟登录
+	// 模拟登录，这里的ccnu服务调用可以考虑在bff层进行聚合，其实这样应该更优雅一些
+	// 但是由于我想实践error的网络传输，所以还是保持这里进行调用
 	res, err := s.ccnu.Login(ctx, &ccnuv1.LoginRequest{
 		StudentId: studentId,
 		Password:  password,
