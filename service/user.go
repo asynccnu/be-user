@@ -13,9 +13,9 @@ var (
 )
 
 type UserService interface {
-	LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error)
 	UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
 	FindById(ctx context.Context, uid int64) (domain.User, error)
+	FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error)
 }
 
 type userService struct {
@@ -23,28 +23,7 @@ type userService struct {
 	ccnu ccnuv1.CCNUServiceClient
 }
 
-func (s *userService) FindById(ctx context.Context, uid int64) (domain.User, error) {
-	return s.repo.FindById(ctx, uid)
-}
-
-func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error {
-	return s.repo.UpdateSensitiveInfo(ctx, user)
-}
-
-func (s *userService) LoginByCCNU(ctx context.Context, studentId string, password string) (domain.User, error) {
-	// 模拟登录，这里的ccnu服务调用可以考虑在bff层进行聚合，其实这样应该更优雅一些
-	// 但是由于我想实践error的网络传输，所以还是保持这里进行调用
-	res, err := s.ccnu.Login(ctx, &ccnuv1.LoginRequest{
-		StudentId: studentId,
-		Password:  password,
-	})
-	if err != nil {
-		return domain.User{}, err
-	}
-	if !res.Success {
-		return domain.User{}, ErrInvalidStudentIdOrPassword
-	}
-
+func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error) {
 	u, err := s.repo.FindByStudentId(ctx, studentId)
 	if err == nil {
 		return u, nil
@@ -61,6 +40,14 @@ func (s *userService) LoginByCCNU(ctx context.Context, studentId string, passwor
 	}
 	// 如果后续分库分表，这里必须从主库查询
 	return s.repo.FindByStudentId(ctx, studentId)
+}
+
+func (s *userService) FindById(ctx context.Context, uid int64) (domain.User, error) {
+	return s.repo.FindById(ctx, uid)
+}
+
+func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error {
+	return s.repo.UpdateSensitiveInfo(ctx, user)
 }
 
 func NewUserService(repo repository.UserRepository, ccnu ccnuv1.CCNUServiceClient) UserService {
