@@ -18,7 +18,6 @@ func InitGRPCServer() grpcx.Server {
 		ioc.InitGRPCxKratosServer,
 		grpc.NewUserServiceServer,
 		service.NewUserService,
-		ioc.InitCCNUClient,
 		repository.NewCachedUserRepository,
 		dao.NewGORMUserDAO,
 		cache.NewRedisUserCache,

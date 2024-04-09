@@ -25,10 +25,9 @@ func InitGRPCServer() grpcx.Server {
 	cmdable := ioc.InitRedis()
 	userCache := cache.NewRedisUserCache(cmdable)
 	userRepository := repository.NewCachedUserRepository(userDAO, userCache, logger)
-	client := ioc.InitEtcdClient()
-	ccnuServiceClient := ioc.InitCCNUClient(client)
-	userService := service.NewUserService(userRepository, ccnuServiceClient)
+	userService := service.NewUserService(userRepository)
 	userServiceServer := grpc.NewUserServiceServer(userService)
+	client := ioc.InitEtcdClient()
 	server := ioc.InitGRPCxKratosServer(userServiceServer, client, logger)
 	return server
 }
