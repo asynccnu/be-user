@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	ccnuv1 "github.com/MuxiKeStack/be-api/gen/proto/ccnu/v1"
 	"github.com/MuxiKeStack/be-user/domain"
 	"github.com/MuxiKeStack/be-user/repository"
 )
@@ -20,7 +19,6 @@ type UserService interface {
 
 type userService struct {
 	repo repository.UserRepository
-	ccnu ccnuv1.CCNUServiceClient
 }
 
 func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error) {
@@ -50,6 +48,6 @@ func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.Us
 	return s.repo.UpdateSensitiveInfo(ctx, user)
 }
 
-func NewUserService(repo repository.UserRepository, ccnu ccnuv1.CCNUServiceClient) UserService {
-	return &userService{repo: repo, ccnu: ccnu}
+func NewUserService(repo repository.UserRepository) UserService {
+	return &userService{repo: repo}
 }
