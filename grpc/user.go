@@ -6,6 +6,7 @@ import (
 	"github.com/MuxiKeStack/be-user/domain"
 	"github.com/MuxiKeStack/be-user/service"
 	"google.golang.org/grpc"
+	"time"
 )
 
 type UserServiceServer struct {
@@ -29,11 +30,7 @@ func (s *UserServiceServer) FindOrCreateByStudentId(ctx context.Context, request
 }
 
 func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request *userv1.UpdateNonSensitiveInfoRequest) (*userv1.UpdateNonSensitiveInfoResponse, error) {
-	err := s.svc.UpdateNonSensitiveInfo(ctx, domain.User{
-		Id:       request.GetUid(),
-		Avatar:   request.GetAvatar(),
-		Nickname: request.GetNickname(),
-	})
+	err := s.svc.UpdateNonSensitiveInfo(ctx, convertToDomain(request.User))
 	return &userv1.UpdateNonSensitiveInfoResponse{}, err
 }
 
@@ -54,5 +51,18 @@ func convertToV(user domain.User) *userv1.User {
 		Utime:     user.Utime.UnixMilli(),
 		Ctime:     user.Ctime.UnixMilli(),
 		New:       user.New,
+	}
+}
+
+func convertToDomain(user *userv1.User) domain.User {
+	return domain.User{
+		Id:        user.GetId(),
+		StudentId: user.GetStudentId(),
+		Password:  user.GetPassword(),
+		Avatar:    user.GetAvatar(),
+		Nickname:  user.GetNickname(),
+		New:       user.GetCtime() == user.GetUtime(),
+		Utime:     time.UnixMilli(user.GetUtime()),
+		Ctime:     time.UnixMilli(user.GetCtime()),
 	}
 }

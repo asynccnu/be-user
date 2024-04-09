@@ -69,8 +69,8 @@ func NewGORMUserDAO(db *gorm.DB) UserDAO {
 
 type User struct {
 	Id       int64  `gorm:"primaryKey,autoIncrement"`
-	Sid      string `gorm:"type=char(12);unique"`
-	Nickname string `gorm:"type=varchar(20)"`
+	Sid      string `gorm:"unique; type:char(12)"`
+	Nickname string `gorm:"type:varchar(20)"`
 	Avatar   string
 	Utime    int64 // 如果涉及跨国，整个系统统一使用UTC 0时区
 	Ctime    int64
