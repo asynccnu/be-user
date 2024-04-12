@@ -44,16 +44,7 @@ func (repo *CachedUserRepository) FindById(ctx context.Context, uid int64) (doma
 	if err != nil {
 		return domain.User{}, err
 	}
-	res = repo.toDomain(u)
-	// 异步回写
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
-		defer cancel()
-		er := repo.cache.Set(ctx, res)
-		if er != nil {
-			repo.l.Error("回写用户缓存失败", logger.Error(err), logger.Int64("uid", uid))
-		}
-	}()
+	res = repo.toDomain(u) // 这里不适合回写
 	return res, nil
 }
 
