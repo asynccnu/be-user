@@ -22,7 +22,8 @@ func (s *UserServiceServer) Register(server grpc.ServiceRegistrar) {
 	userv1.RegisterUserServiceServer(server, s)
 }
 
-func (s *UserServiceServer) FindOrCreateByStudentId(ctx context.Context, request *userv1.FindOrCreateByStudentIdRequest) (*userv1.FindOrCreateByStudentIdResponse, error) {
+func (s *UserServiceServer) FindOrCreateByStudentId(ctx context.Context,
+	request *userv1.FindOrCreateByStudentIdRequest) (*userv1.FindOrCreateByStudentIdResponse, error) {
 	u, err := s.svc.FindOrCreateByStudentId(ctx, request.GetStudentId())
 	return &userv1.FindOrCreateByStudentIdResponse{
 		User: convertToV(u),
