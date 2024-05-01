@@ -37,6 +37,9 @@ func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request 
 
 func (s *UserServiceServer) Profile(ctx context.Context, request *userv1.ProfileRequest) (*userv1.ProfileResponse, error) {
 	u, err := s.svc.FindById(ctx, request.GetUid())
+	if err == service.ErrUserNotFound {
+		return &userv1.ProfileResponse{}, userv1.ErrorUserNotFound("用户不存在: %d", request.GetUid())
+	}
 	return &userv1.ProfileResponse{
 		User: convertToV(u),
 	}, err

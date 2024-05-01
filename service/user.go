@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrInvalidStudentIdOrPassword = errors.New("学号或密码不对")
+	ErrUserNotFound               = repository.ErrUserNotFind
 )
 
 type UserService interface {
