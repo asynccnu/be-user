@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/MuxiKeStack/be-user/domain"
-	"github.com/MuxiKeStack/be-user/repository"
+	"github.com/asynccnu/be-user/domain"
+	"github.com/asynccnu/be-user/repository"
 )
 
 var (

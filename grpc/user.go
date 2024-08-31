@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 	userv1 "github.com/MuxiKeStack/be-api/gen/proto/user/v1"
-	"github.com/MuxiKeStack/be-user/domain"
-	"github.com/MuxiKeStack/be-user/service"
+	"github.com/asynccnu/be-user/domain"
+	"github.com/asynccnu/be-user/service"
 	"google.golang.org/grpc"
 	"time"
 )

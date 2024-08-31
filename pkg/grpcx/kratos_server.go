@@ -1,7 +1,7 @@
 package grpcx
 
 import (
-	"github.com/MuxiKeStack/be-user/pkg/logger"
+	"github.com/asynccnu/be-user/pkg/logger"
 	etcd "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"

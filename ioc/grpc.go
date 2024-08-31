@@ -1,9 +1,9 @@
 package ioc
 
 import (
-	"github.com/MuxiKeStack/be-user/grpc"
-	"github.com/MuxiKeStack/be-user/pkg/grpcx"
-	"github.com/MuxiKeStack/be-user/pkg/logger"
+	"github.com/asynccnu/be-user/grpc"
+	"github.com/asynccnu/be-user/pkg/grpcx"
+	"github.com/asynccnu/be-user/pkg/logger"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/spf13/viper"

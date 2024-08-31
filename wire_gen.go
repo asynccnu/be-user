@@ -7,13 +7,13 @@
 package main
 
 import (
-	"github.com/MuxiKeStack/be-user/grpc"
-	"github.com/MuxiKeStack/be-user/ioc"
-	"github.com/MuxiKeStack/be-user/pkg/grpcx"
-	"github.com/MuxiKeStack/be-user/repository"
-	"github.com/MuxiKeStack/be-user/repository/cache"
-	"github.com/MuxiKeStack/be-user/repository/dao"
-	"github.com/MuxiKeStack/be-user/service"
+	"github.com/asynccnu/be-user/grpc"
+	"github.com/asynccnu/be-user/ioc"
+	"github.com/asynccnu/be-user/pkg/grpcx"
+	"github.com/asynccnu/be-user/repository"
+	"github.com/asynccnu/be-user/repository/cache"
+	"github.com/asynccnu/be-user/repository/dao"
+	"github.com/asynccnu/be-user/service"
 )
 
 // Injectors from wire.go:

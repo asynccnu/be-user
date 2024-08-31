@@ -1,8 +1,8 @@
 package ioc
 
 import (
-	"github.com/MuxiKeStack/be-user/pkg/logger"
-	"github.com/MuxiKeStack/be-user/repository/dao"
+	"github.com/asynccnu/be-user/pkg/logger"
+	"github.com/asynccnu/be-user/repository/dao"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

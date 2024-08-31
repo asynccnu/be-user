@@ -1,7 +1,7 @@
 package ioc
 
 import (
-	"github.com/MuxiKeStack/be-user/pkg/logger"
+	"github.com/asynccnu/be-user/pkg/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"

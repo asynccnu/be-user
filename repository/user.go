@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-	"github.com/MuxiKeStack/be-user/domain"
-	"github.com/MuxiKeStack/be-user/pkg/logger"
-	"github.com/MuxiKeStack/be-user/repository/cache"
-	"github.com/MuxiKeStack/be-user/repository/dao"
+	"github.com/asynccnu/be-user/domain"
+	"github.com/asynccnu/be-user/pkg/logger"
+	"github.com/asynccnu/be-user/repository/cache"
+	"github.com/asynccnu/be-user/repository/dao"
 	"time"
 )
 

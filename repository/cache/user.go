@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/MuxiKeStack/be-user/domain"
+	"github.com/asynccnu/be-user/domain"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
