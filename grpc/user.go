@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	userv1 "github.com/MuxiKeStack/be-api/gen/proto/user/v1"
+	userv1 "github.com/asynccnu/be-api/gen/proto/user/v1"
 	"github.com/asynccnu/be-user/domain"
 	"github.com/asynccnu/be-user/service"
 	"google.golang.org/grpc"
@@ -35,14 +35,12 @@ func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request 
 	return &userv1.UpdateNonSensitiveInfoResponse{}, err
 }
 
-func (s *UserServiceServer) Profile(ctx context.Context, request *userv1.ProfileRequest) (*userv1.ProfileResponse, error) {
-	u, err := s.svc.FindById(ctx, request.GetUid())
+func (s *UserServiceServer) GetCookie(ctx context.Context, request *userv1.GetCookieRequest) (*userv1.GetCookieResponse, error) {
+	u, err := s.svc.GetCookie(ctx, request.GetUserid())
 	if err == service.ErrUserNotFound {
-		return &userv1.ProfileResponse{}, userv1.ErrorUserNotFound("用户不存在: %d", request.GetUid())
+		return &userv1.GetCookieResponse{}, userv1.ErrorUserNotFound("用户不存在: %d", request.GetUserid())
 	}
-	return &userv1.ProfileResponse{
-		User: convertToV(u),
-	}, err
+	return &userv1.GetCookieResponse{Cookie: u}, err
 }
 
 func convertToV(user domain.User) *userv1.User {
@@ -50,8 +48,6 @@ func convertToV(user domain.User) *userv1.User {
 		Id:        user.Id,
 		StudentId: user.StudentId,
 		Password:  user.Password,
-		Avatar:    user.Avatar,
-		Nickname:  user.Nickname,
 		Utime:     user.Utime.UnixMilli(),
 		Ctime:     user.Ctime.UnixMilli(),
 		New:       user.New,
@@ -63,8 +59,6 @@ func convertToDomain(user *userv1.User) domain.User {
 		Id:        user.GetId(),
 		StudentId: user.GetStudentId(),
 		Password:  user.GetPassword(),
-		Avatar:    user.GetAvatar(),
-		Nickname:  user.GetNickname(),
 		New:       user.GetCtime() == user.GetUtime(),
 		Utime:     time.UnixMilli(user.GetUtime()),
 		Ctime:     time.UnixMilli(user.GetCtime()),

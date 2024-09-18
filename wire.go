@@ -22,6 +22,7 @@ func InitGRPCServer() grpcx.Server {
 		dao.NewGORMUserDAO,
 		cache.NewRedisUserCache,
 		// 第三方
+		ioc.InitCCNUClient,
 		ioc.InitEtcdClient,
 		ioc.InitRedis,
 		ioc.InitDB,

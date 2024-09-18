@@ -41,7 +41,7 @@ func (cache *RedisUserCache) Set(ctx context.Context, user domain.User) error {
 }
 
 func (cache *RedisUserCache) key(uid int64) string {
-	return fmt.Sprintf("kstack:users:%d", uid)
+	return fmt.Sprintf("ccnubox:users:%d", uid)
 }
 
 func NewRedisUserCache(cmd redis.Cmdable) UserCache {

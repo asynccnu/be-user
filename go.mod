@@ -1,9 +1,8 @@
 module github.com/asynccnu/be-user
 
-go 1.22.0
+go 1.22.5
 
 require (
-	github.com/asynccnu/be-api v0.0.0-20240504061729-3ccbcc6d4b78
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20240430092255-be624d035565
 	github.com/go-kratos/kratos/v2 v2.7.3
 	github.com/go-sql-driver/mysql v1.8.1

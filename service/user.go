@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	v1 "github.com/asynccnu/be-api/gen/proto/ccnu/v1"
 	"github.com/asynccnu/be-user/domain"
 	"github.com/asynccnu/be-user/repository"
 )
@@ -16,10 +17,12 @@ type UserService interface {
 	UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
 	FindById(ctx context.Context, uid int64) (domain.User, error)
 	FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error)
+	GetCookie(ctx context.Context, studentId string) (cookie string, err error)
 }
 
 type userService struct {
 	repo repository.UserRepository
+	ccnu v1.CCNUServiceClient
 }
 
 func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error) {
@@ -49,6 +52,22 @@ func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.Us
 	return s.repo.UpdateSensitiveInfo(ctx, user)
 }
 
-func NewUserService(repo repository.UserRepository) UserService {
-	return &userService{repo: repo}
+func (s *userService) GetCookie(ctx context.Context, studentId string) (cookie string, err error) {
+	user, err := s.repo.FindByStudentId(ctx, studentId)
+	if err != nil {
+		return "", err
+	}
+	resp, err := s.ccnu.GetCCNUCookie(ctx, &v1.GetCCNUCookieRequest{
+		StudentId: user.StudentId,
+		Password:  user.Password,
+	})
+	if err != nil {
+		return "", err
+	}
+	cookie = resp.Cookie
+	return cookie, nil
+}
+
+func NewUserService(repo repository.UserRepository, ccnu v1.CCNUServiceClient) UserService {
+	return &userService{repo: repo, ccnu: ccnu}
 }

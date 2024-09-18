@@ -67,9 +67,7 @@ func (repo *CachedUserRepository) Create(ctx context.Context, u domain.User) err
 func (repo *CachedUserRepository) toDomain(u dao.User) domain.User {
 	return domain.User{
 		Id:        u.Id,
-		StudentId: u.Sid,
-		Avatar:    u.Avatar,
-		Nickname:  u.Nickname,
+		StudentId: u.StudentId,
 		New:       u.Utime == u.Ctime, // 更新时间为创建时间说明是未更新过信息的新用户
 		Utime:     time.UnixMilli(u.Utime),
 		Ctime:     time.UnixMilli(u.Ctime),
@@ -78,9 +76,8 @@ func (repo *CachedUserRepository) toDomain(u dao.User) domain.User {
 
 func (repo *CachedUserRepository) toEntity(u domain.User) dao.User {
 	return dao.User{
-		Id:       u.Id,
-		Sid:      u.StudentId,
-		Nickname: u.Nickname,
-		Avatar:   u.Avatar,
+		Id:        u.Id,
+		StudentId: u.StudentId,
+		Password:  u.Password,
 	}
 }
