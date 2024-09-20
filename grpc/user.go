@@ -24,7 +24,7 @@ func (s *UserServiceServer) Register(server grpc.ServiceRegistrar) {
 
 func (s *UserServiceServer) FindOrCreateByStudentId(ctx context.Context,
 	request *userv1.FindOrCreateByStudentIdRequest) (*userv1.FindOrCreateByStudentIdResponse, error) {
-	u, err := s.svc.FindOrCreateByStudentId(ctx, request.GetStudentId())
+	u, err := s.svc.FindOrCreateByStudentId(ctx, request.GetStudentId(), request.GetPassword())
 	return &userv1.FindOrCreateByStudentIdResponse{
 		User: convertToV(u),
 	}, err
@@ -36,9 +36,9 @@ func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request 
 }
 
 func (s *UserServiceServer) GetCookie(ctx context.Context, request *userv1.GetCookieRequest) (*userv1.GetCookieResponse, error) {
-	u, err := s.svc.GetCookie(ctx, request.GetUserid())
+	u, err := s.svc.GetCookie(ctx, request.GetStudentId())
 	if err == service.ErrUserNotFound {
-		return &userv1.GetCookieResponse{}, userv1.ErrorUserNotFound("用户不存在: %d", request.GetUserid())
+		return &userv1.GetCookieResponse{}, userv1.ErrorUserNotFound("用户不存在: %d", request.GetStudentId())
 	}
 	return &userv1.GetCookieResponse{Cookie: u}, err
 }

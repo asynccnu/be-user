@@ -16,7 +16,7 @@ var (
 type UserService interface {
 	UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
 	FindById(ctx context.Context, uid int64) (domain.User, error)
-	FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error)
+	FindOrCreateByStudentId(ctx context.Context, studentId string, password string) (domain.User, error)
 	GetCookie(ctx context.Context, studentId string) (cookie string, err error)
 }
 
@@ -25,7 +25,7 @@ type userService struct {
 	ccnu v1.CCNUServiceClient
 }
 
-func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId string) (domain.User, error) {
+func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId string, password string) (domain.User, error) {
 	u, err := s.repo.FindByStudentId(ctx, studentId)
 	if err == nil {
 		return u, nil
@@ -35,7 +35,7 @@ func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId str
 		return domain.User{}, err
 	}
 	// 用户不存在，首次登录，创建用户
-	err = s.repo.Create(ctx, domain.User{StudentId: studentId})
+	err = s.repo.Create(ctx, domain.User{StudentId: studentId, Password: password})
 	// 并发场景下，如果错误为非duplicate错误，则为系统异常
 	if err != nil && err != repository.ErrDuplicateUser {
 		return domain.User{}, err

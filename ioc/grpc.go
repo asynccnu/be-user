@@ -19,6 +19,7 @@ func InitGRPCxKratosServer(userServer *grpc.UserServiceServer, ecli *clientv3.Cl
 		EtcdTTL int64  `yaml:"etcdTTL"`
 	}
 	var cfg Config
+
 	err := viper.UnmarshalKey("grpc.server", &cfg)
 	if err != nil {
 		panic(err)
