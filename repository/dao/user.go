@@ -43,7 +43,7 @@ func (dao *GORMUserDAO) UpdateSensitiveInfoById(ctx context.Context, user User) 
 
 func (dao *GORMUserDAO) FindByStudentId(ctx context.Context, sid string) (User, error) {
 	var u User
-	err := dao.db.WithContext(ctx).Where("sid = ?", sid).First(&u).Error
+	err := dao.db.WithContext(ctx).Where("student_id = ?", sid).First(&u).Error
 	return u, err
 }
 
