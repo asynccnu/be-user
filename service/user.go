@@ -17,6 +17,7 @@ type UserService interface {
 	UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
 	FindById(ctx context.Context, uid int64) (domain.User, error)
 	FindOrCreateByStudentId(ctx context.Context, studentId string, password string) (domain.User, error)
+	FindByStudentId(ctx context.Context, studentId string) (domain.User, error)
 	GetCookie(ctx context.Context, studentId string) (cookie string, err error)
 }
 
@@ -47,7 +48,9 @@ func (s *userService) FindOrCreateByStudentId(ctx context.Context, studentId str
 func (s *userService) FindById(ctx context.Context, uid int64) (domain.User, error) {
 	return s.repo.FindById(ctx, uid)
 }
-
+func (s *userService) FindByStudentId(ctx context.Context, studentId string) (domain.User, error) {
+	return s.repo.FindByStudentId(ctx, studentId)
+}
 func (s *userService) UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error {
 	return s.repo.UpdateSensitiveInfo(ctx, user)
 }
@@ -57,6 +60,7 @@ func (s *userService) GetCookie(ctx context.Context, studentId string) (cookie s
 	if err != nil {
 		return "", err
 	}
+
 	resp, err := s.ccnu.GetCCNUCookie(ctx, &v1.GetCCNUCookieRequest{
 		StudentId: user.StudentId,
 		Password:  user.Password,

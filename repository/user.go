@@ -68,6 +68,7 @@ func (repo *CachedUserRepository) toDomain(u dao.User) domain.User {
 	return domain.User{
 		Id:        u.Id,
 		StudentId: u.StudentId,
+		Password:  u.Password,
 		New:       u.Utime == u.Ctime, // 更新时间为创建时间说明是未更新过信息的新用户
 		Utime:     time.UnixMilli(u.Utime),
 		Ctime:     time.UnixMilli(u.Ctime),

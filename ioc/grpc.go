@@ -27,6 +27,7 @@ func InitGRPCxKratosServer(userServer *grpc.UserServiceServer, ecli *clientv3.Cl
 	server := kgrpc.NewServer(
 		kgrpc.Address(cfg.Addr),
 		kgrpc.Middleware(recovery.Recovery()),
+		kgrpc.Timeout(10*time.Second),
 	)
 
 	userServer.Register(server)

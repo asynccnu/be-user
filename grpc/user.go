@@ -30,6 +30,22 @@ func (s *UserServiceServer) FindOrCreateByStudentId(ctx context.Context,
 	}, err
 }
 
+func (s *UserServiceServer) FindByStudentId(ctx context.Context,
+	request *userv1.FindByStudentIdRequest) (*userv1.FindByStudentIdResponse, error) {
+	u, err := s.svc.FindByStudentId(ctx, request.GetStudentId())
+	return &userv1.FindByStudentIdResponse{
+		User: convertToV(u),
+	}, err
+}
+
+func (s *UserServiceServer) FindOrCreateByUserId(ctx context.Context,
+	request *userv1.FindOrCreateByUserIdRequest) (*userv1.FindOrCreateByUserIdResponse, error) {
+	u, err := s.svc.FindById(ctx, request.GetUserId())
+	return &userv1.FindOrCreateByUserIdResponse{
+		User: convertToV(u),
+	}, err
+}
+
 func (s *UserServiceServer) UpdateNonSensitiveInfo(ctx context.Context, request *userv1.UpdateNonSensitiveInfoRequest) (*userv1.UpdateNonSensitiveInfoResponse, error) {
 	err := s.svc.UpdateNonSensitiveInfo(ctx, convertToDomain(request.User))
 	return &userv1.UpdateNonSensitiveInfoResponse{}, err
